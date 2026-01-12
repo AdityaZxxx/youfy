@@ -10,9 +10,17 @@ from src.config import ConfigManager
 def main():
     UI.show_banner()
     
+    # Check for interactive terminal
+    is_interactive = sys.stdin.isatty()
+    
     if len(sys.argv) > 1:
         url = sys.argv[1]
     else:
+        if not is_interactive:
+            UI.show_message("Error: No URL provided and not running in an interactive terminal.", style="bold red")
+            print("Usage: ./run.sh <url>")
+            return
+            
         # Fallback to asking user if no arg provided
         url = questionary.text("Paste URL here:").ask()
 
