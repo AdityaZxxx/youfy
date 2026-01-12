@@ -42,26 +42,18 @@ class YouTubeHandler:
                         'duration': info.get('duration'),
                         'view_count': info.get('view_count'),
                         'is_playlist': 'entries' in info,
-                        'playlist_count': len(info['entries']) if 'entries' in info else 0
+                        'playlist_count': len(info['entries']) if 'entries' in info else 0,
+                        'formats': info.get('formats', [])
                     }
                 except Exception as e:
                     return None
 
-    def download_video_best(self, url):
-        ydl_opts = {
-            'format': 'bestvideo+bestaudio/best',
-            'outtmpl': f'{self.output_dir}/%(title)s.%(ext)s',
-            'merge_output_format': 'mp4',
-        }
-        self._download(url, ydl_opts)
-
-    def download_video_1080(self, url):
-        ydl_opts = {
-            'format': 'bestvideo[height<=1080]+bestaudio/best[height<=1080]',
-            'outtmpl': f'{self.output_dir}/%(title)s.%(ext)s',
-            'merge_output_format': 'mp4',
-        }
-        self._download(url, ydl_opts)
+    def get_available_resolutions(self, formats):
+        resolutions = set()
+        for f in formats:
+            if f.get('vcodec') != 'none' and f.get('height'):
+                resolutions.add(f['height'])
+        return sorted(list(resolutions), reverse=True)
 
     def search(self, query, limit=5):
         with console.status(f"[bold green]Searching for '{query}'...[/bold green]", spinner="dots"):
@@ -81,19 +73,57 @@ class YouTubeHandler:
                     return []
         return []
 
-    def download_audio(self, url):
+    def download_video(self, url, height=None):
+        if height:
+            format_str = f'bestvideo[height<={height}]+bestaudio/best[height<={height}]'
+        else:
+            format_str = 'bestvideo+bestaudio/best'
+            
         ydl_opts = {
-            'format': 'bestaudio/best',
+            'format': format_str,
+            'outtmpl': f'{self.output_dir}/%(title)s.%(ext)s',
+            'merge_output_format': 'mp4',
             'writethumbnail': True,
             'addmetadata': True,
             'postprocessors': [
-                {'key': 'FFmpegExtractAudio','preferredcodec': 'mp3','preferredquality': '192'},
                 {'key': 'EmbedThumbnail'},
                 {'key': 'FFmpegMetadata'},
             ],
+        }
+        self._download(url, ydl_opts)
+
+    def download_audio(self, url, audio_format='mp3'):
+        # Map nice names to ffmpeg codec names/args
+        # formats: mp3, m4a, flac, wav, opus
+        codec_map = {
+            'mp3': {'codec': 'mp3', 'quality': '192'},
+            'm4a': {'codec': 'm4a', 'quality': None}, # default
+            'flac': {'codec': 'flac', 'quality': None},
+            'wav': {'codec': 'wav', 'quality': None},
+            'opus': {'codec': 'opus', 'quality': None},
+        }
+        
+        target = codec_map.get(audio_format, codec_map['mp3'])
+        
+        postprocessors = [{'key': 'FFmpegExtractAudio', 'preferredcodec': target['codec']}]
+        
+        if target['quality']:
+             postprocessors[0]['preferredquality'] = target['quality']
+
+        # Embedding thumbnail only works well for mp3/m4a/flac usually
+        if audio_format in ['mp3', 'm4a', 'flac']:
+             postprocessors.append({'key': 'EmbedThumbnail'})
+             postprocessors.append({'key': 'FFmpegMetadata'})
+
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'writethumbnail': True if audio_format in ['mp3', 'm4a', 'flac'] else False,
+            'addmetadata': True if audio_format in ['mp3', 'm4a', 'flac'] else False,
+            'postprocessors': postprocessors,
             'outtmpl': f'{self.output_dir}/%(title)s.%(ext)s',
         }
         self._download(url, ydl_opts)
+
 
     def _download(self, url, opts):
         console.print(f"\n[bold cyan]Downloading to:[/bold cyan] {self.output_dir}")
@@ -141,7 +171,6 @@ class YouTubeHandler:
                         total=total, 
                         filename=filename
                     )
-                    self.progress_bar.start_task(self.task_id)
 
         elif d['status'] == 'finished':
-            self.progress_bar.update(self.task_id, completed=100, filename="Processing...")
+            self.progress_bar.update(self.task_id, filename="Processing [FFmpeg]...")

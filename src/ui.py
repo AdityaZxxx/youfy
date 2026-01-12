@@ -74,6 +74,25 @@ class UI:
         ).ask()
     
     @staticmethod
+    def ask_list(message, choices):
+        return questionary.select(
+            message,
+            choices=choices,
+            qmark="?",
+            pointer="❯",
+            style=questionary.Style([
+                ('qmark', 'fg:purple bold'),
+                ('question', 'fg:white bold'),
+                ('answer', 'fg:cyan bold'),
+                ('pointer', 'fg:cyan bold'),
+                ('highlighted', 'fg:cyan bold'),
+                ('selected', 'fg:cyan bold'),
+                ('separator', 'fg:grey'),
+                ('instruction', 'fg:grey italic'),
+            ])
+        ).ask()
+    
+    @staticmethod
     def show_message(msg, style="bold green"):
         console.print(msg, style=style)
 

@@ -69,23 +69,71 @@ def process_youtube(url):
     if info:
         UI.show_info(info)
         
-        choices = [
-            "Download Video (Best)",
-            "Download Video (1080p)",
-            "Download Audio (MP3)",
-            "Cancel"
-        ]
-        
-        choice = UI.ask_action(choices)
-        
-        if choice == "Download Video (Best)":
-            handler.download_video_best(url)
-        elif choice == "Download Video (1080p)":
-            handler.download_video_1080(url)
-        elif choice == "Download Audio (MP3)":
-            handler.download_audio(url)
-        elif choice == "Cancel":
-            print("Aborted.")
+        while True:
+            main_choices = [
+                questionary.Choice(title="Download Video", value="video"),
+                questionary.Choice(title="Download Audio", value="audio"),
+                questionary.Choice(title="Cancel", value="cancel")
+            ]
+            
+            main_choice = UI.ask_action(main_choices)
+            
+            if main_choice == "video":
+                # Fetch available resolutions
+                resolutions = handler.get_available_resolutions(info.get('formats', []))
+                
+                if not resolutions:
+                    # Fallback if parsing fails
+                    handler.download_video(url)
+                    return
+
+                # Create resolution choices
+                res_choices = [questionary.Choice(title="Best Available", value="best")]
+                for res in resolutions:
+                    res_choices.append(questionary.Choice(title=f"{res}p", value=res))
+                
+                res_choices.append(questionary.Choice(title="Back", value="back"))
+                res_choices.append(questionary.Choice(title="Cancel", value="cancel"))
+                
+                res_choice = UI.ask_list("Select Resolution:", res_choices)
+                
+                if res_choice == "back":
+                    continue
+                elif res_choice == "cancel":
+                    print("Aborted.")
+                    return
+                elif res_choice == "best":
+                    handler.download_video(url)
+                    return
+                else:
+                    handler.download_video(url, height=res_choice)
+                    return
+
+            elif main_choice == "audio":
+                audio_choices = [
+                    questionary.Choice(title="MP3 (Universal)", value="mp3"),
+                    questionary.Choice(title="M4A (Better Quality)", value="m4a"),
+                    questionary.Choice(title="FLAC (Lossless)", value="flac"),
+                    questionary.Choice(title="WAV (Uncompressed)", value="wav"),
+                    questionary.Choice(title="OPUS (High Efficiency)", value="opus"),
+                    questionary.Choice(title="Back", value="back"),
+                    questionary.Choice(title="Cancel", value="cancel")
+                ]
+                
+                fmt_choice = UI.ask_list("Select Audio Format:", audio_choices)
+                
+                if fmt_choice == "back":
+                    continue
+                elif fmt_choice == "cancel":
+                    print("Aborted.")
+                    return
+                else:
+                    handler.download_audio(url, audio_format=fmt_choice)
+                    return
+                    
+            elif main_choice == "cancel":
+                print("Aborted.")
+                return
     else:
         UI.show_message("Failed to fetch video info", style="bold red")
 
