@@ -16,11 +16,23 @@ class SpotifyHandler:
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
 
-    def download(self, url):
+    def download(self, url, audio_format='mp3'):
         client_id, client_secret = ConfigManager.get_spotify_credentials()
         
+        # SpotDL format mapping
+        # Supported: mp3, flac, ogg, opus, m4a, wav
+        valid_formats = ['mp3', 'flac', 'ogg', 'opus', 'm4a', 'wav']
+        if audio_format not in valid_formats:
+            audio_format = 'mp3'
+
         # Base command
-        cmd = ["spotdl", "download", url, "--output", self.output_dir]
+        cmd = [
+            "spotdl", 
+            "download", 
+            url, 
+            "--output", self.output_dir,
+            "--format", audio_format
+        ]
         
         # Add auth if available
         if client_id and client_secret:
