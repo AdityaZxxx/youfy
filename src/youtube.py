@@ -19,7 +19,7 @@ class YouTubeHandler:
     def __init__(self, output_dir=None):
         if output_dir is None:
             # Default to User's Downloads folder
-            self.output_dir = os.path.expanduser("~/Downloads/Spotube/YouTube")
+            self.output_dir = os.path.expanduser("~/Downloads/Youfy/YouTube")
         else:
             self.output_dir = output_dir
             

@@ -5,7 +5,7 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}=== Spotube Setup (Spotify & YouTube Downloader) ===${NC}"
+echo -e "${BLUE}=== Youfy Setup (Spotify & YouTube Downloader) ===${NC}"
 
 # Get script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
@@ -39,4 +39,4 @@ chmod +x "$SCRIPT_DIR/run.sh"
 echo -e "${GREEN}Setup Complete!${NC}"
 echo -e "You can now run the tool using: ${BLUE}./run.sh${NC}"
 echo -e "Or create a symlink to use it globally:"
-echo -e "  sudo ln -s $SCRIPT_DIR/run.sh /usr/local/bin/spotube"
+echo -e "  sudo ln -s $SCRIPT_DIR/run.sh /usr/local/bin/youfy"

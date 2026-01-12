@@ -14,15 +14,15 @@ class UI:
         console.clear()
         # ASCII Art Title
         ascii_title = """
- ____             _         _          
-/ ___| _ __   ___| |_ _   _| |__   ___ 
-\\___ \\| '_ \\ / _ \\ __| | | | '_ \\ / _ \\
- ___) | |_) | (_) | |_| |_| | |_) |  __/
-|____/| .__/ \\___/ \\__|\\__,_|_.__/ \\___|
-      |_|                                
+██╗   ██╗ ██████╗ ██╗   ██╗███████╗██╗   ██╗
+╚██╗ ██╔╝██╔═══██╗██║   ██║██╔════╝╚██╗ ██╔╝
+ ╚████╔╝ ██║   ██║██║   ██║█████╗   ╚████╔╝ 
+  ╚██╔╝  ██║   ██║██║   ██║██╔══╝    ╚██╔╝  
+   ██║   ╚██████╔╝╚██████╔╝██║        ██║   
+   ╚═╝    ╚═════╝  ╚═════╝ ╚═╝        ╚═╝   
         """
         title = Text(ascii_title, style="bold green")
-        subtitle = Text("Spotify & YouTube Downloader", style="italic white")
+        subtitle = Text("YouTube & Spotify Downloader", style="italic white")
         
         content = Align.center(Text.assemble(title, "\n", subtitle))
         panel = Panel(content, border_style="green", box=box.ROUNDED)

@@ -3,7 +3,7 @@ import os
 from rich.console import Console
 
 # Use standard XDG config path
-CONFIG_DIR = os.path.expanduser("~/.config/spotube")
+CONFIG_DIR = os.path.expanduser("~/.config/youfy")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 console = Console()
 
