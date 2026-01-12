@@ -16,7 +16,7 @@ A beautiful, advanced CLI-based media downloader for Linux. Built for productivi
 
 1. Clone this repository:
    ```bash
-   git clone <your-repo-url> youfy
+   git clone https://github.com/AdityaZxxx/youfy.git
    cd youfy
    ```
 2. Run the setup script:
