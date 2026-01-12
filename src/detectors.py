@@ -19,4 +19,4 @@ class URLDetector:
             if re.match(pattern, url):
                 return 'spotify'
         
-        return 'unknown'
+        return 'search'

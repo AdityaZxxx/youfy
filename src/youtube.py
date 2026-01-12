@@ -63,14 +63,34 @@ class YouTubeHandler:
         }
         self._download(url, ydl_opts)
 
+    def search(self, query, limit=5):
+        with console.status(f"[bold green]Searching for '{query}'...[/bold green]", spinner="dots"):
+            ydl_opts = {
+                'quiet': True, 
+                'no_warnings': True,
+                'extract_flat': True,
+                'logger': QuietLogger()
+            }
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                try:
+                    # ytsearchN:query searches for N results
+                    result = ydl.extract_info(f"ytsearch{limit}:{query}", download=False)
+                    if 'entries' in result:
+                        return result['entries']
+                except Exception as e:
+                    return []
+        return []
+
     def download_audio(self, url):
         ydl_opts = {
             'format': 'bestaudio/best',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
+            'writethumbnail': True,
+            'addmetadata': True,
+            'postprocessors': [
+                {'key': 'FFmpegExtractAudio','preferredcodec': 'mp3','preferredquality': '192'},
+                {'key': 'EmbedThumbnail'},
+                {'key': 'FFmpegMetadata'},
+            ],
             'outtmpl': f'{self.output_dir}/%(title)s.%(ext)s',
         }
         self._download(url, ydl_opts)
