@@ -128,6 +128,8 @@ def process_youtube(url):
                     print("Aborted.")
                     return
                 else:
+                    if fmt_choice in ['flac', 'wav']:
+                        UI.show_message("Note: Source audio is lossy (YouTube). Converting to FLAC/WAV increases file size without improving quality.", style="bold yellow")
                     handler.download_audio(url, audio_format=fmt_choice)
                     return
                     
@@ -157,16 +159,44 @@ def process_spotify(url):
                 UI.show_message("Credentials saved!", style="green")
 
     handler = SpotifyHandler()
-    # SpotDL is self-contained, so we just ask to confirm
-    choices = [
-        "Download",
-        "Cancel"
-    ]
-    choice = UI.ask_action(choices)
-    if choice == "Download":
-        handler.download(url)
-    else:
-        print("Aborted.")
+    
+    while True:
+        choices = [
+            questionary.Choice(title="Download (Default MP3)", value="mp3"),
+            questionary.Choice(title="Select Format", value="custom"),
+            questionary.Choice(title="Cancel", value="cancel")
+        ]
+        
+        choice = UI.ask_action(choices)
+        
+        if choice == "cancel":
+            print("Aborted.")
+            return
+            
+        audio_fmt = "mp3"
+        if choice == "custom":
+            audio_choices = [
+                questionary.Choice(title="MP3 (Universal)", value="mp3"),
+                questionary.Choice(title="M4A (Better Quality)", value="m4a"),
+                questionary.Choice(title="FLAC (Lossless)", value="flac"),
+                questionary.Choice(title="WAV (Uncompressed)", value="wav"),
+                questionary.Choice(title="OPUS (High Efficiency)", value="opus"),
+                questionary.Choice(title="Back", value="back"),
+                questionary.Choice(title="Cancel", value="cancel")
+            ]
+            audio_fmt = UI.ask_list("Select Audio Format:", audio_choices)
+            
+            if audio_fmt == "back":
+                continue
+            elif audio_fmt == "cancel":
+                print("Aborted.")
+                return
+
+            if audio_fmt in ['flac', 'wav']:
+                UI.show_message("Note: Source audio is lossy (YouTube). Converting to FLAC/WAV increases file size without improving quality.", style="bold yellow")
+
+        handler.download(url, audio_format=audio_fmt)
+        return
 
 if __name__ == "__main__":
     main()
